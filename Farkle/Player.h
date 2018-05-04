@@ -5,14 +5,13 @@
 class Player
 {
 public:
-	Player();
-	~Player();
+	Player(std::string name);
 
 	//Getters and Setters
-	void setPlayerName(std::string name);
 	std::string getPlayerName() const { return name_; };
 
 private:
+	int score_;
 	std::string name_;
 	std::vector<int> dice_;
 };
