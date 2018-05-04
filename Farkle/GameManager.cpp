@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "GameManager.h"
 #include <iostream>
+#include <random>
 #include <string>
 
 /************************
@@ -128,7 +129,7 @@ void GameManager::play()
 	}
 
 	// Create a new Player object for each player playing. Heh.
-	for (int i = 1; i <= numPlayers_; i++)
+	for (unsigned int i = 1; i <= numPlayers_; i++)
 	{
 		// First player to tell us their name
 		if (i == 1)
@@ -149,9 +150,8 @@ void GameManager::play()
 
 			recordPlayerName();
 
-			// Subtract the total size of players
+			// Subtract 1 from players_.size() because of indexes
 			std::cout << "Hello " << players_[(players_.size() - 1)].getPlayerName() << ".\n";
-			pause(); // TODO Delete
 		}
 		// This block will exec between the first and last players
 		else
@@ -163,6 +163,44 @@ void GameManager::play()
 		
 	}
 
+	std::cout << "\nNow we're going to roll a single die to see who goes first.\n";
+
+	char input; // Capture input for the single dice roll
+
+	for (unsigned int i = 0; i < players_.size(); i++)
+	{
+		std::cout << players_[i].getPlayerName() << " press R to roll your die.\n";
+
+		isDone = false;
+
+		while (!isDone)
+		{
+			std::cin >> input;
+
+			int roll; // Stores the singleDieRoll 
+			
+			switch (input)
+			{
+			case 'r':
+			case 'R':
+				// TODO Use an exception here. There's 100% no reason why the RNG would give us a value
+				// that's not between 1 and 6. Use out of range error.
+
+				roll = rollSingleDie();
+
+				std::cout << "You rolled a " << roll << ".\n";
+				players_[i].setSingleDieRoll(roll);
+				isDone = true;
+				break;
+
+			default:
+				std::cout << "Input not recognized, please try again.\n";
+			}
+		}
+	}
+	// TODO Determine who has the highest singleDieRoll. Handle what happens if two players get
+	// the same high number. Sort the players_ vector based on this number. Begin player turns, which
+	// will be handled by the Player class. 
 
 }
 
@@ -183,4 +221,15 @@ void GameManager::recordPlayerName()
 	std::cin >> playerName;
 	Player player(playerName);
 	players_.push_back(player);
+}
+
+int GameManager::rollSingleDie()
+{
+	std::random_device rd; // Obtain random number from hardware
+	std::mt19937 eng(rd()); // Seed the generator
+	std::uniform_int_distribution<> distr(1, 6); // Define the range
+
+	int roll = distr(eng);
+
+	return roll;
 }

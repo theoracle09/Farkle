@@ -23,5 +23,6 @@ private:
 	std::vector<Player> players_;
 
 	void recordPlayerName();
+	int rollSingleDie();
 };
 
