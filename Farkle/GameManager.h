@@ -10,6 +10,10 @@ public:
 	void displayRules();
 	void play();
 
+	// Getters and Setters
+	void setNumPlayers(int numPlayers);
+	int getNumPlayers() const { return numPlayers_; };
+
 
 private:
 	Menu menu_;

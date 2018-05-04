@@ -31,6 +31,7 @@ void GameManager::displayMenu()
 		{
 			case 'p':
 			case 'P':
+				play();
 				break;
 
 			case 'r':
@@ -80,5 +81,37 @@ void GameManager::displayRules()
 
 void GameManager::play()
 {
+	int userInput;
 
+	clearScreen();
+	std::cout << "How many players will be playing today?\n";
+
+	bool isDone = false;
+
+	while (!isDone)
+	{
+		std::cin >> userInput;
+		
+		if (std::cin.fail())
+		{
+			std::cin.clear();
+			std::cin.ignore();
+			std::cout << "That's not a number. Try again: ";
+		}
+		else if (userInput <= 0)
+		{
+			std::cout << "Well, you can't have zero or negative players, right? Try again: ";
+		}
+		else
+		{
+			isDone = true;
+			setNumPlayers(userInput);
+		}
+	}
+	
+}
+
+void GameManager::setNumPlayers(int numPlayers)
+{
+	numPlayers_ = numPlayers;
 }
