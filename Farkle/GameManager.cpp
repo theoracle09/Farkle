@@ -139,7 +139,7 @@ void GameManager::play()
 
 			recordPlayerName();
 
-			std::cout << "Hello " << players[0].getPlayerName() << ".\n";
+			std::cout << "Hello " << players_[0].getPlayerName() << ".\n";
 
 		}
 		// This will be the LAST player to tell us their name
@@ -149,7 +149,8 @@ void GameManager::play()
 
 			recordPlayerName();
 
-			std::cout << "Hello " << players[(players.size() - 1)].getPlayerName() << ".\n";
+			// Subtract the total size of players
+			std::cout << "Hello " << players_[(players_.size() - 1)].getPlayerName() << ".\n";
 			pause(); // TODO Delete
 		}
 		// This block will exec between the first and last players
@@ -157,7 +158,7 @@ void GameManager::play()
 		{
 			std::cout << "Next player's name: ";
 			recordPlayerName();
-			std::cout << "Hello " << players[i - 1].getPlayerName() << ".\n";
+			std::cout << "Hello " << players_[i - 1].getPlayerName() << ".\n";
 		}
 		
 	}
@@ -181,5 +182,5 @@ void GameManager::recordPlayerName()
 
 	std::cin >> playerName;
 	Player player(playerName);
-	players.push_back(player);
+	players_.push_back(player);
 }

@@ -11,7 +11,7 @@ public:
 	void displayMenu();
 	void displayRules();
 	void play();
-	void pause(); // TODO Delete. OS specific function/code
+	void pause(); // TODO Delete. OS specific function/code for testing
 
 	// Getters and Setters
 	void setNumPlayers(int numPlayers);
@@ -20,7 +20,7 @@ public:
 private:
 	Menu menu_;
 	int numPlayers_;
-	std::vector<Player> players;
+	std::vector<Player> players_;
 
 	void recordPlayerName();
 };
