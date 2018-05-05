@@ -5,6 +5,8 @@
 Player::Player(std::string name)
 {
 	name_ = name;
-	score_ = 0; // Initialize player's score to 0
+	score_ = 0;
+	singleDieRoll_ = 0;
+	isFirstPlayer_ = false;
 }
 

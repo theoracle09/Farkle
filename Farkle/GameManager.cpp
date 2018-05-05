@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GameManager.h"
+#include <algorithm>  // std::rotate
 #include <iostream>
 #include <random>
 #include <string>
@@ -10,6 +11,10 @@ Constructor
 GameManager::GameManager()
 {
 	numPlayers_ = 0;
+
+	// How many sides do the dice have? Possible feature where players can use dice that have
+	// more than 6 sides. If it becomes a feature, the user can define this number during set-up.
+	diceSides_ = 6;  
 }
 
 /************************
@@ -45,6 +50,11 @@ void GameManager::displayMenu()
 			case 'p':
 			case 'P':
 				play();
+
+				// Once the program returns to this line, the game is over
+				// TODO delete the cout line at some point.
+				std::cout << "If you see this: the program exec is done with the play() method.\n";
+				isDone = true;
 				break;
 
 			case 'r':
@@ -123,8 +133,8 @@ void GameManager::play()
 		}
 		else
 		{
-			isDone = true;
 			setNumPlayers(userInput);
+			isDone = true;
 		}
 	}
 
@@ -163,9 +173,11 @@ void GameManager::play()
 		
 	}
 
-	std::cout << "\nNow we're going to roll a single die to see who goes first.\n";
+	std::cout << "\nNow we're going to roll a single die. The first person to roll a 6 goes first.\n" <<
+		"Otherwise, whoever has the highest number will go first.\n";
 
 	char input; // Capture input for the single dice roll
+	bool rolledHighestNumber = false;
 
 	for (unsigned int i = 0; i < players_.size(); i++)
 	{
@@ -176,8 +188,6 @@ void GameManager::play()
 		while (!isDone)
 		{
 			std::cin >> input;
-
-			int roll; // Stores the singleDieRoll 
 			
 			switch (input)
 			{
@@ -186,21 +196,70 @@ void GameManager::play()
 				// TODO Use an exception here. There's 100% no reason why the RNG would give us a value
 				// that's not between 1 and 6. Use out of range error.
 
+				int roll;
 				roll = rollSingleDie();
 
-				std::cout << "You rolled a " << roll << ".\n";
-				players_[i].setSingleDieRoll(roll);
-				isDone = true;
-				break;
+				// Check if a player rolls the highest number
+				if (roll == diceSides_)
+				{
+					std::cout << "\nYou rolled a " << roll << ".\n";
+					std::cout << players_[i].getPlayerName() << ", nice one! You're first.\n";
+					players_[i].setIsFirstPlayer();  // Makes this player the first player
+					i = players_.size();  // set the loop variable to something which breaks the loop
+					rolledHighestNumber = true;
+					isDone = true;
+					break;
+				}
+				else
+				{
+					std::cout << "\nYou rolled a " << roll << ".\n";
+					players_[i].setSingleDieRoll(roll);
+					isDone = true;
+					break;
+				}
 
 			default:
 				std::cout << "Input not recognized, please try again.\n";
 			}
 		}
 	}
-	// TODO Determine who has the highest singleDieRoll. Handle what happens if two players get
-	// the same high number. Sort the players_ vector based on this number. Begin player turns, which
-	// will be handled by the Player class. 
+
+	if (rolledHighestNumber)
+	{
+		// Loop through and check who rolled the highest possible number
+		for (unsigned int i = 0; i < players_.size(); i++)
+		{
+			if (players_[i].getIsFirstPlayer())
+			{
+				// Re-arrange the vector so the person who rolled the highest number is @ index 0
+				std::rotate(players_.begin(), players_.begin() + i, players_.end());
+			}
+		}
+	}
+	else
+	{
+		// Loop through and find the highest roll (since no one got the absolute highest number, 
+		// check who has the highest number.) Confusing, I know.
+	
+		int highestRoll = 0;
+		int highestRollPosition = 0;
+		std::vector<Player> tempPlayers;
+
+		for (unsigned int i = 0; i < players_.size(); i++)
+		{
+			if (highestRoll < players_[i].getSingleDieRoll())
+			{
+				highestRoll = players_[i].getSingleDieRoll();
+				highestRollPosition = i;
+			}
+			else if ()
+			{
+				// Need to find a way to handle if multiple players have the highest number, but not the maximum 
+			}
+		}
+		
+		std::rotate(players_.begin(), players_.begin() + highestRollPosition, players_.end());
+	}
 
 }
 
@@ -225,9 +284,10 @@ void GameManager::recordPlayerName()
 
 int GameManager::rollSingleDie()
 {
+	// TODO Find a better way to obtain a random number. For this game, we can't have a uniform distribution. 
 	std::random_device rd; // Obtain random number from hardware
 	std::mt19937 eng(rd()); // Seed the generator
-	std::uniform_int_distribution<> distr(1, 6); // Define the range
+	std::uniform_int_distribution<> distr(1, diceSides_); // Define the range
 
 	int roll = distr(eng);
 

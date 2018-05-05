@@ -20,6 +20,7 @@ public:
 private:
 	Menu menu_;
 	int numPlayers_;
+	int diceSides_; // Stores how many sides the dice have. Possible feature in the future.
 	std::vector<Player> players_;
 
 	void recordPlayerName();
