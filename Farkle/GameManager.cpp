@@ -177,7 +177,7 @@ void GameManager::play()
 		"Otherwise, whoever has the highest number will go first.\n";
 
 	char input; // Capture input for the single dice roll
-	bool rolledHighestNumber = false;
+	bool rolledHighestNumber = false;  // Flag to store if the highest number has been rolled or not
 
 	for (unsigned int i = 0; i < players_.size(); i++)
 	{
@@ -210,7 +210,7 @@ void GameManager::play()
 					isDone = true;
 					break;
 				}
-				else
+				else  // Player didn't roll the highest number.
 				{
 					std::cout << "\nYou rolled a " << roll << ".\n";
 					players_[i].setSingleDieRoll(roll);
@@ -238,28 +238,18 @@ void GameManager::play()
 	}
 	else
 	{
-		// Loop through and find the highest roll (since no one got the absolute highest number, 
-		// check who has the highest number.) Confusing, I know.
-	
-		int highestRoll = 0;
-		int highestRollPosition = 0;
-		std::vector<Player> tempPlayers;
+		std::cout << "\nIt looks like no one rolled the highest possible number.\n" <<
+			"I'll choose who goes first based on who rolled the highest number.\n" <<
+			"If multiple people rolled the same, high number, I'll randomly pick one.\n";
 
-		for (unsigned int i = 0; i < players_.size(); i++)
-		{
-			if (highestRoll < players_[i].getSingleDieRoll())
-			{
-				highestRoll = players_[i].getSingleDieRoll();
-				highestRollPosition = i;
-			}
-			else if ()
-			{
-				// Need to find a way to handle if multiple players have the highest number, but not the maximum 
-			}
-		}
-		
-		std::rotate(players_.begin(), players_.begin() + highestRollPosition, players_.end());
+		// Sort the players_ vector based on their singleDieRoll
+		std::sort(players_.begin(), players_.end(), cmd);
+
+		// With the vector sorted, the game is ready to be started
+		std::cout << players_[0].getPlayerName() << " it looks like you're first player!\n";
 	}
+
+	// TODO Begin the core gameplay
 
 }
 
@@ -292,4 +282,9 @@ int GameManager::rollSingleDie()
 	int roll = distr(eng);
 
 	return roll;
+}
+
+bool GameManager::cmd(const Player& p1, const Player& p2)
+{
+	return p1.getSingleDieRoll() > p2.getSingleDieRoll();
 }

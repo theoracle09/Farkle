@@ -12,6 +12,7 @@ public:
 	void displayRules();
 	void play();
 	void pause(); // TODO Delete. OS specific function/code for testing
+	static bool cmd(const Player& p1, const Player& p2);
 
 	// Getters and Setters
 	void setNumPlayers(int numPlayers);
