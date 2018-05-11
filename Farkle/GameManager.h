@@ -25,6 +25,7 @@ private:
 	std::vector<Player> players_;
 
 	void recordPlayerName();
+	void findWhoGoesFirst();
 	int rollSingleDie();
 };
 

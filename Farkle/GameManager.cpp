@@ -131,7 +131,11 @@ void GameManager::play()
 		{
 			std::cout << "Well, you can't have zero or negative players, right? Try again: ";
 		}
-		else
+		else if (userInput == 1)
+		{
+			// TODO This is where we'll handle single player game mode
+		}
+		else if (userInput > 1)
 		{
 			setNumPlayers(userInput);
 			isDone = true;
@@ -156,7 +160,7 @@ void GameManager::play()
 		// This will be the LAST player to tell us their name
 		else if (i == numPlayers_)
 		{
-			std::cout << "And the last player's name is: ";
+			std::cout << "\nAnd the last player's name is: ";
 
 			recordPlayerName();
 
@@ -166,12 +170,42 @@ void GameManager::play()
 		// This block will exec between the first and last players
 		else
 		{
-			std::cout << "Next player's name: ";
+			std::cout << "\nNext player's name: ";
 			recordPlayerName();
 			std::cout << "Hello " << players_[i - 1].getPlayerName() << ".\n";
 		}
 		
 	}
+
+	findWhoGoesFirst();
+
+	
+
+	// TODO Begin the core gameplay
+
+}
+
+void GameManager::pause()
+{
+	system("PAUSE");
+}
+
+void GameManager::setNumPlayers(int numPlayers)
+{
+	numPlayers_ = numPlayers;
+}
+
+void GameManager::recordPlayerName()
+{
+	std::string playerName;
+
+	std::cin >> playerName;
+	Player player(playerName);
+	players_.push_back(player);
+}
+
+void GameManager::findWhoGoesFirst()
+{
 
 	std::cout << "\nNow we're going to roll a single die. The first person to roll a 6 goes first.\n" <<
 		"Otherwise, whoever has the highest number will go first.\n";
@@ -182,13 +216,12 @@ void GameManager::play()
 	for (unsigned int i = 0; i < players_.size(); i++)
 	{
 		std::cout << players_[i].getPlayerName() << " press R to roll your die.\n";
-
-		isDone = false;
+		bool isDone = false;
 
 		while (!isDone)
 		{
 			std::cin >> input;
-			
+
 			switch (input)
 			{
 			case 'r':
@@ -202,7 +235,7 @@ void GameManager::play()
 				// Check if a player rolls the highest number
 				if (roll == diceSides_)
 				{
-					std::cout << "\nYou rolled a " << roll << ".\n";
+					std::cout << "\nYou rolled a " << roll << ".\n\n";
 					std::cout << players_[i].getPlayerName() << ", nice one! You're first.\n";
 					players_[i].setIsFirstPlayer();  // Makes this player the first player
 					i = players_.size();  // set the loop variable to something which breaks the loop
@@ -212,7 +245,7 @@ void GameManager::play()
 				}
 				else  // Player didn't roll the highest number.
 				{
-					std::cout << "\nYou rolled a " << roll << ".\n";
+					std::cout << "\nYou rolled a " << roll << ".\n\n";
 					players_[i].setSingleDieRoll(roll);
 					isDone = true;
 					break;
@@ -248,28 +281,6 @@ void GameManager::play()
 		// With the vector sorted, the game is ready to be started
 		std::cout << players_[0].getPlayerName() << " it looks like you're first player!\n";
 	}
-
-	// TODO Begin the core gameplay
-
-}
-
-void GameManager::pause()
-{
-	system("PAUSE");
-}
-
-void GameManager::setNumPlayers(int numPlayers)
-{
-	numPlayers_ = numPlayers;
-}
-
-void GameManager::recordPlayerName()
-{
-	std::string playerName;
-
-	std::cin >> playerName;
-	Player player(playerName);
-	players_.push_back(player);
 }
 
 int GameManager::rollSingleDie()

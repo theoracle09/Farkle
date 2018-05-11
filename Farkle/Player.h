@@ -12,7 +12,7 @@ public:
 	int getSingleDieRoll() const { return singleDieRoll_; };
 	void setSingleDieRoll(int singleDieRoll) { singleDieRoll_ = singleDieRoll; };
 	void setIsFirstPlayer() { isFirstPlayer_ = true; };
-	bool getIsFirstPlayer() { return isFirstPlayer_; };
+	bool getIsFirstPlayer() const { return isFirstPlayer_; };
 
 private:
 	int score_;
