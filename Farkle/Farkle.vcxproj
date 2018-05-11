@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DiceGui.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="Player.h" />
@@ -154,6 +155,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DiceGui.cpp" />
     <ClCompile Include="Farkle.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Menu.cpp" />

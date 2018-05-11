@@ -285,7 +285,6 @@ void GameManager::findWhoGoesFirst()
 
 int GameManager::rollSingleDie()
 {
-	// TODO Find a better way to obtain a random number. For this game, we can't have a uniform distribution. 
 	std::random_device rd; // Obtain random number from hardware
 	std::mt19937 eng(rd()); // Seed the generator
 	std::uniform_int_distribution<> distr(1, diceSides_); // Define the range

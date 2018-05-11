@@ -6,6 +6,7 @@ class Player
 {
 public:
 	Player(std::string name);
+	void Turn();
 
 	//Getters and Setters
 	std::string getPlayerName() const { return name_; };
@@ -20,5 +21,8 @@ private:
 	bool isFirstPlayer_;
 	std::string name_;
 	std::vector<int> dice_;
+	bool hasEnteredGame_;
+	
+	void rollDice();
 };
 
