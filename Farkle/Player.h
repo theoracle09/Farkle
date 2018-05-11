@@ -5,7 +5,7 @@
 class Player
 {
 public:
-	Player(std::string name);
+	Player(std::string name, int diceSides);
 	void Turn();
 
 	//Getters and Setters
@@ -18,11 +18,12 @@ public:
 private:
 	int score_;
 	int singleDieRoll_;
+	int diceSides_;
 	bool isFirstPlayer_;
 	std::string name_;
 	std::vector<int> dice_;
 	bool hasEnteredGame_;
 	
-	void rollDice();
+	void rollDice(int numDice);
 };
 

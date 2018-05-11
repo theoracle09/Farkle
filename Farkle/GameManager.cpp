@@ -179,9 +179,18 @@ void GameManager::play()
 
 	findWhoGoesFirst();
 
-	
+	isDone = false;
 
 	// TODO Begin the core gameplay
+	do
+	{
+		// Loop through each player and have them play their turn
+		for (int i = 0; i < players_.size(); i++)
+		{
+			players_[i].Turn();
+		}
+
+	} while (!isDone);
 
 }
 
@@ -200,7 +209,7 @@ void GameManager::recordPlayerName()
 	std::string playerName;
 
 	std::cin >> playerName;
-	Player player(playerName);
+	Player player(playerName, diceSides_);
 	players_.push_back(player);
 }
 
@@ -226,9 +235,6 @@ void GameManager::findWhoGoesFirst()
 			{
 			case 'r':
 			case 'R':
-				// TODO Use an exception here. There's 100% no reason why the RNG would give us a value
-				// that's not between 1 and 6. Use out of range error.
-
 				int roll;
 				roll = rollSingleDie();
 
