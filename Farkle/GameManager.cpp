@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "GameManager.h"
-#include <algorithm>  // std::rotate
+#include <algorithm>  // std::rotate, std::sort
 #include <iostream>
 #include <random>
 #include <string>
@@ -119,8 +119,11 @@ void GameManager::play()
 	// Sanitize the user's input. Makes sure they can only enter a number.
 	while (!isDone)
 	{
-		std::cin >> userInput;
+		// DEV 
+		userInput = 4;
+		//std::cin >> userInput;
 		
+
 		if (std::cin.fail())
 		{
 			std::cin.clear();  // Clear the error flag within std::cin
@@ -143,7 +146,7 @@ void GameManager::play()
 	}
 
 	// Create a new Player object for each player playing. Heh.
-	for (unsigned int i = 1; i <= numPlayers_; i++)
+	for (int i = 1; i <= numPlayers_; i++)
 	{
 		// First player to tell us their name
 		if (i == 1)
@@ -185,7 +188,7 @@ void GameManager::play()
 	do
 	{
 		// Loop through each player and have them play their turn
-		for (int i = 0; i < players_.size(); i++)
+		for (unsigned int i = 0; i < players_.size(); i++)
 		{
 			players_[i].Turn();
 		}
@@ -208,7 +211,30 @@ void GameManager::recordPlayerName()
 {
 	std::string playerName;
 
-	std::cin >> playerName;
+	// DEV
+	switch (flag_)
+	{
+	case 0:
+		playerName = "Josh";
+		flag_++;
+		break;
+
+	case 1:
+		playerName = "Jaci";
+		flag_++;
+		break;
+
+	case 2:
+		playerName = "Bill";
+		flag_++;
+		break;
+
+	case 3:
+		playerName = "Bob";
+		break;
+	}
+	//std::cin >> playerName;
+	
 	Player player(playerName, diceSides_);
 	players_.push_back(player);
 }
@@ -217,7 +243,7 @@ void GameManager::findWhoGoesFirst()
 {
 
 	std::cout << "\nNow we're going to roll a single die. The first person to roll a 6 goes first.\n" <<
-		"Otherwise, whoever has the highest number will go first.\n";
+		"Otherwise, whoever has the highest number will go first.\n\n";
 
 	char input; // Capture input for the single dice roll
 	bool rolledHighestNumber = false;  // Flag to store if the highest number has been rolled or not
@@ -277,15 +303,23 @@ void GameManager::findWhoGoesFirst()
 	}
 	else
 	{
-		std::cout << "\nIt looks like no one rolled the highest possible number.\n" <<
-			"I'll choose who goes first based on who rolled the highest number.\n" <<
-			"If multiple people rolled the same, high number, I'll randomly pick one.\n";
+		std::cout << "\nIt looks like no one rolled a 6.\n" <<
+			"I'll choose who goes first based on who rolled the highest number.\n";
 
 		// Sort the players_ vector based on their singleDieRoll
 		std::sort(players_.begin(), players_.end(), cmd);
 
+		//Check if there are multiple high rolls
+		if (players_[0].getSingleDieRoll() == players_[1].getSingleDieRoll())
+		{
+			std::cout << "Since more than one person rolled the highest number, I'll randomly pick who goes first.\n";
+
+		}
+
 		// With the vector sorted, the game is ready to be started
-		std::cout << players_[0].getPlayerName() << " it looks like you're first player!\n";
+		std::cout << std::endl;
+		std::cout << players_[0].getPlayerName() << ", you're first player with a roll of " << 
+			players_[0].getSingleDieRoll() << std::endl;
 	}
 }
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "ScoreRules.h"
 #include <string>
 #include <vector>
 
@@ -20,9 +21,10 @@ private:
 	int singleDieRoll_;
 	int diceSides_;
 	bool isFirstPlayer_;
+	bool hasEnteredGame_;
 	std::string name_;
 	std::vector<int> dice_;
-	bool hasEnteredGame_;
+	std::vector<int> storedDice_;
 	
 	void rollDice(int numDice);
 };
