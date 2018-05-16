@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "Player.h"
-#include <iostream>
 #include <random>
 #include <sstream>
 
@@ -15,40 +14,73 @@ Player::Player(std::string name, int diceSides)
 	hasEnteredGame_ = true;
 }
 
-void Player::Turn()
+void Player::turn()
 {
-	if (hasEnteredGame_)
+	bool isPlayersTurn = true;
+
+	while (isPlayersTurn)
 	{
-		std::cout << "\nOkay " << name_ << ", press \'r\' to roll your dice.\n";
-		
-		char userInput;
 
-		std::cin >> userInput;
+		clearScreen();
 
-		rollDice(6);
+		std::cout << "####### " << name_ << "'s turn! #######\n\n\n";
 
-		std::cout << "\nYou rolled: ";
+		std::cout << "Roll: ";
 
-		// Print the dice to the screen
-		for (unsigned int i = 0; i < dice_.size(); i++)
+		if (dice_.size() > 0)
 		{
-			std::cout << dice_[i] << "  ";
+			for (int i : dice_)
+			{
+				std::cout << dice_[i] << " ";
+			}
 		}
 
-		std::cout << std::endl;
-		std::cout << "\nPress one of the following keys..\n";
-		std::cout << "(P)ass  --  (S)core  --  (Q)uit\n";
+		std::cout << "\n\nStored Dice: ";
 
-		bool isDone = false;
+		if (storedDice_.size() > 0)
+		{
+			for (int i : storedDice_)
+			{
+				std::cout << storedDice_[i] << " ";
+			}
+		}
+
+		std::cout << "\n\n\nWhat would you like to do?\n";
+		std::cout << "(R)oll  --  (P)ass  --  (S)core  --  (Q)uit\n";
+
+		bool isDone = false;  // Bool to make sure user presses only R, P, S, and Q
 
 		while (!isDone)
 		{
+			char userInput;
+
 			std::cin >> userInput;
 
 			switch (userInput)
 			{
+			case 'r':
+			case 'R':
+				// Are any dice stored yet?
+				if (storedDice_.size() == 0)
+				{
+					// Roll all 6 dice
+					rollDice(6);
+				}
+				else
+				{
+					// Subtract the amount of stored dice, and roll the remainder
+					rollDice(6 - storedDice_.size());
+				}
+				isDone = true;  // Get out of input loop
+				break;
+			case 'P':
+			case 'p':
+				// Move on to the next player's turn
+				isPlayersTurn = false;
+				isDone = true;
+				break;
 			case 's':
-			case 'S':  
+			case 'S':
 			{  // Curly braces needed to declare variables inside SWITCH (local scope)
 				std::string line;
 				int number;
@@ -66,26 +98,33 @@ void Player::Turn()
 				}
 
 				// Check the storedDice vector against the scoring rules
-				//scoreRules_.check(storedDice_);
+				scoreRules_.check(storedDice_);
 
 				// See what else the player wants to do:
 				// Roll remaining dice, or stop and keep points acquired.
 
 				break;
 			}
-			case 'P':
-			case 'p':
-
-				isDone = true;
+			case 'q':
+			case 'Q':
+				// TODO handle what happens when the player wants to quit to main menu
 				break;
 			default:
 				std::cout << "Invalid input. Please try again.\n";
 			}
 		}
 	}
-	else
+
+}
+
+void Player::removeDice(int diceToRemove)
+{
+	for (const int i : dice_)
 	{
-		
+		if (dice_[i] == diceToRemove)
+		{
+			dice_.erase(dice_.begin() + i);
+		}
 	}
 }
 

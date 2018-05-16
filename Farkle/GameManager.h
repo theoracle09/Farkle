@@ -2,12 +2,12 @@
 #include "Menu.h"
 #include "Player.h"
 #include <vector>
+#include <iostream>
 
 class GameManager
 {
 public:
 	GameManager();
-	void clearScreen();
 	void displayMenu();
 	void displayRules();
 	void play();
@@ -15,7 +15,6 @@ public:
 	static bool cmd(const Player& p1, const Player& p2);
 
 	// Getters and Setters
-	void setNumPlayers(int numPlayers);
 
 
 private:
@@ -24,6 +23,7 @@ private:
 	int diceSides_; // Stores how many sides the dice have. Possible feature in the future.
 	std::vector<Player> players_;
 	
+	void clearScreen() const { std::cout << std::string(100, '\n'); };
 	void recordPlayerName();
 	void findWhoGoesFirst();
 	int rollSingleDie();

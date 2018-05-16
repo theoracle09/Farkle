@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "GameManager.h"
 #include <algorithm>  // std::rotate, std::sort
-#include <iostream>
 #include <random>
 #include <string>
 
@@ -15,16 +14,6 @@ GameManager::GameManager()
 	// How many sides do the dice have? Possible feature where players can use dice that have
 	// more than 6 sides. If it becomes a feature, the user can define this number during set-up.
 	diceSides_ = 6;  
-}
-
-/************************
-Sends 100 newline characters to the output
-stream, to 'fake' clearing the screen. This
-just makes the text scroll up a ways in the console.
-*************************/
-void GameManager::clearScreen()
-{
-	std::cout << std::string(100, '\n');
 }
 
 /************************
@@ -140,7 +129,7 @@ void GameManager::play()
 		}
 		else if (userInput > 1)
 		{
-			setNumPlayers(userInput);
+			numPlayers_ = userInput;
 			isDone = true;
 		}
 	}
@@ -180,17 +169,26 @@ void GameManager::play()
 		
 	}
 
-	findWhoGoesFirst();
+	// DEV
+	std::cout << "\n\n######### DEV -- Josh is going first\n";
+	//findWhoGoesFirst();
 
-	isDone = false;
+	// Have the user press any key to continue to the first play
+	std::cout << "\nPress any key to begin.\n";
 
-	// TODO Begin the core gameplay
+	std::string s;  // Temp string to pause for user input
+	std::cin.ignore();
+	std::getline(std::cin, s); 
+
+	isDone = false;  // Reset bool flag
+
+	// Begin the core gameplay
 	do
 	{
 		// Loop through each player and have them play their turn
 		for (unsigned int i = 0; i < players_.size(); i++)
 		{
-			players_[i].Turn();
+			players_[i].turn();
 		}
 
 	} while (!isDone);
@@ -200,11 +198,6 @@ void GameManager::play()
 void GameManager::pause()
 {
 	system("PAUSE");
-}
-
-void GameManager::setNumPlayers(int numPlayers)
-{
-	numPlayers_ = numPlayers;
 }
 
 void GameManager::recordPlayerName()
