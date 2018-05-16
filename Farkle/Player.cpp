@@ -7,7 +7,8 @@
 Player::Player(std::string name, int diceSides)
 {
 	name_ = name;
-	score_ = 0;
+	turnScore_ = 0;
+	totalScore_ = 0;
 	diceSides_ = diceSides;
 	singleDieRoll_ = 0;
 	isFirstPlayer_ = false;
@@ -16,6 +17,7 @@ Player::Player(std::string name, int diceSides)
 
 void Player::turn()
 {
+	std::string alertMessage = "null";
 	bool isPlayersTurn = true;
 
 	while (isPlayersTurn)
@@ -25,11 +27,22 @@ void Player::turn()
 
 		std::cout << "####### " << name_ << "'s turn! #######\n\n\n";
 
-		std::cout << "Roll: ";
+		if (alertMessage == "null")
+		{
+			std::cout << "Roll some dice!";
+		}
+		else
+		{
+			std::cout << alertMessage;
+		}
+
+		std::cout << "\n\n\nScore: " << turnScore_;
+
+		std::cout << "\n\n\nRoll: ";
 
 		if (dice_.size() > 0)
 		{
-			for (int i : dice_)
+			for (unsigned int i = 0; i < dice_.size(); i++)
 			{
 				std::cout << dice_[i] << " ";
 			}
@@ -39,7 +52,7 @@ void Player::turn()
 
 		if (storedDice_.size() > 0)
 		{
-			for (int i : storedDice_)
+			for (unsigned int i = 0; i < storedDice_.size(); i++)
 			{
 				std::cout << storedDice_[i] << " ";
 			}
@@ -60,6 +73,8 @@ void Player::turn()
 			{
 			case 'r':
 			case 'R':
+				alertMessage = "----You throw your dice against the table...";
+
 				// Are any dice stored yet?
 				if (storedDice_.size() == 0)
 				{
@@ -71,44 +86,115 @@ void Player::turn()
 					// Subtract the amount of stored dice, and roll the remainder
 					rollDice(6 - storedDice_.size());
 				}
+
+				for (unsigned int i = 0; i < dice_.size(); i++)
+				{
+					if (dice_[i] == 1 || dice_[i] == 5)
+					{
+						// Found a 1 or a 5, so break out of for loop
+						isFarkled_ = false;
+						continue;
+					}
+					else
+					{
+						isFarkled_ = true;
+					}
+				}
+
 				isDone = true;  // Get out of input loop
 				break;
+
 			case 'P':
 			case 'p':
 				// Move on to the next player's turn
 				isPlayersTurn = false;
 				isDone = true;
 				break;
+
 			case 's':
 			case 'S':
 			{  // Curly braces needed to declare variables inside SWITCH (local scope)
-				std::string line;
-				int number;
-				std::vector<int> triples;
-
-				std::cout << "\nWhich dice would you like to set aside for scoring?\n";
-				std::cout << "Ex. input: 1 1 1 5. Separate your numbers with a space.\n";
-
-				std::cin.ignore(); // Ignore the newline char leftover from last cin operation
-				std::getline(std::cin, line);  // Read the entire line of input from user
-				std::istringstream stream(line);  // Create our own stream
-				while (stream >> number)
+				// Make sure the player has dice to score, first
+				if (dice_.size() == 0)  
 				{
-					storedDice_.push_back(number);
+					alertMessage = "Press \'R\' to roll your dice first!";
 				}
+				else
+				{
+					std::string line;
+					int number;
 
-				// Check the storedDice vector against the scoring rules
-				scoreRules_.check(storedDice_);
+					std::cout << "\nWhich dice would you like to set aside for scoring?\n";
+					std::cout << "Ex. input: 1 1 1 5. Separate your numbers with a space.\n";
+
+					std::cin.ignore(); // Ignore the newline char leftover from last cin operation
+					std::getline(std::cin, line);  // Read the entire line of input from user
+					std::istringstream stream(line);  // Create our own stream
+					while (stream >> number)
+					{
+						storedDice_.push_back(number);
+					}
+
+					// TODO Sanitize user's input on what dice they're trying to store
+					// Have a third vector, so we can separate the stored values
+					// and the values we want to check against the scoring rules.
+					// As it is right now, when the user re-rolls with a triple in the storedDice_,
+					// it's being counted in the score as a triple. Not cool.
+
+					// Check to see if there are any triples in the dice to be stored
+					int triples = scoreRules_.scoreDice(storedDice_);
+
+					switch (triples)
+					{
+					case 1:
+					case 2:
+					case 3:
+					case 4:
+					case 5:
+					case 6:
+						// We have a triple, which number do we need to delete from the rolled dice?
+						removeDice(triples, 3);
+
+						// Now add the triple score to the user's score
+						if (triples == 1)
+						{
+							turnScore_ += 1000;
+						}
+						else
+						{
+							turnScore_ += (triples * 100);
+						}
+
+						break;
+					case -5:  // Found no triples
+						for (unsigned int i = 0; i < storedDice_.size(); i++)
+						{
+							if (storedDice_[i] == 1)
+							{
+								turnScore_ += 100;
+								removeDice(1, 1);
+							}
+							else if (storedDice_[i] == 5)
+							{
+								turnScore_ += 50;
+								removeDice(5, 1);
+							}
+						}
+						break;
+					}
+				}
 
 				// See what else the player wants to do:
 				// Roll remaining dice, or stop and keep points acquired.
-
+				isDone = true;
 				break;
 			}
+
 			case 'q':
 			case 'Q':
 				// TODO handle what happens when the player wants to quit to main menu
 				break;
+
 			default:
 				std::cout << "Invalid input. Please try again.\n";
 			}
@@ -117,13 +203,16 @@ void Player::turn()
 
 }
 
-void Player::removeDice(int diceToRemove)
+void Player::removeDice(int die, int numTimes)
 {
-	for (const int i : dice_)
+	int count = 0;
+
+	for (unsigned int i = 0; i < dice_.size(); i++)
 	{
-		if (dice_[i] == diceToRemove)
+		if (dice_[i] == die && count < numTimes)
 		{
 			dice_.erase(dice_.begin() + i);
+			count++;
 		}
 	}
 }

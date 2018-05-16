@@ -5,7 +5,7 @@ class ScoreRules
 {
 public:
 	ScoreRules();
-	void check(std::vector<int>& storedDice);
+	int scoreDice(std::vector<int>& storedDice);
 
 
 private:

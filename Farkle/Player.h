@@ -9,7 +9,7 @@ class Player
 public:
 	Player(std::string name, int diceSides);
 	void turn();
-	void removeDice(int diceToRemove);
+	void removeDice(int die, int count);
 
 	//Getters and Setters
 	std::string getPlayerName() const { return name_; };
@@ -17,10 +17,12 @@ public:
 	void setSingleDieRoll(int singleDieRoll) { singleDieRoll_ = singleDieRoll; };
 	void setIsFirstPlayer() { isFirstPlayer_ = true; };
 	bool getIsFirstPlayer() const { return isFirstPlayer_; };
+	void addToScore(int amount) { turnScore_ += amount; };
 
 private:
 	ScoreRules scoreRules_;
-	int score_;
+	int turnScore_;
+	int totalScore_;
 	int singleDieRoll_;
 	int diceSides_;
 	bool isFirstPlayer_;
@@ -29,6 +31,7 @@ private:
 	std::string name_;
 	std::vector<int> dice_;
 	std::vector<int> storedDice_;
+	std::vector<std::string> consoleEmulator_;
 	
 	void rollDice(int numDice);
 	void clearScreen() const { std::cout << std::string(100, '\n'); };

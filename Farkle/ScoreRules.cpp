@@ -10,11 +10,9 @@ ScoreRules::ScoreRules()
 	
 }
 
-void ScoreRules::check(std::vector<int>& storedDice)
+int ScoreRules::scoreDice(std::vector<int>& storedDice)
 {
 	// Check for triplets
-	int count = 0;
-	int triples = 0;
 	std::vector<int> numberOfSides(6); // Need to define the size here, or we'll get vector subscript errors
 
 	// Keeps a count of how many of each die the player has stored
@@ -55,14 +53,22 @@ void ScoreRules::check(std::vector<int>& storedDice)
 	// Sorts the vector in ascending order, so highest number is at index 5
 	std::sort(tempVector.begin(), tempVector.end());
 
-	// Find the value with the highest frequency
-	for (unsigned int i = 0; i < numberOfSides.size(); i++)
+	// Do we have triplets?
+	if (tempVector[5] == 3) 
 	{
-		if (tempVector[5] == numberOfSides[i])
+		// Find which dice is the triple
+		for (unsigned int i = 0; i < numberOfSides.size(); i++)
 		{
-			std::cout << "\n\n\nTriplet: " << (i + 1);
-			system("PAUSE");
+			if (tempVector[5] == numberOfSides[i])
+			{
+				return (i + 1);
+			}
 		}
+	}
+	else
+	{
+		// No triples
+		return -5;
 	}
 }
 
