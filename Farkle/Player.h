@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <list>
 
 class Player
 {
@@ -28,12 +29,15 @@ private:
 	bool isFirstPlayer_;
 	bool hasEnteredGame_;
 	bool isFarkled_;
+	bool hasRolledDice_;
+	bool canStoreDice_;
 	std::string name_;
 	std::vector<int> dice_;
 	std::vector<int> storedDice_;
-	std::vector<std::string> consoleEmulator_;
+	std::list<std::string> consoleLog_;
 	
-	void rollDice(int numDice);
 	void clearScreen() const { std::cout << std::string(100, '\n'); };
+	void rollDice(int numDice);
+	void pass();
 };
 

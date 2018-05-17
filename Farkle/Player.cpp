@@ -12,13 +12,17 @@ Player::Player(std::string name, int diceSides)
 	diceSides_ = diceSides;
 	singleDieRoll_ = 0;
 	isFirstPlayer_ = false;
+	isFarkled_ = false;
+	hasRolledDice_ = false;
 	hasEnteredGame_ = true;
+	canStoreDice_ = true;
 }
 
 void Player::turn()
 {
-	std::string alertMessage = "null";
 	bool isPlayersTurn = true;
+
+	turnScore_ = 0; // Tracks the player's score throughout the turn
 
 	while (isPlayersTurn)
 	{
@@ -27,16 +31,23 @@ void Player::turn()
 
 		std::cout << "####### " << name_ << "'s turn! #######\n\n\n";
 
-		if (alertMessage == "null")
+		// Displays the first 3 lines of our 'fake console' log
+		int count = 0;
+
+		for (std::list<std::string>::const_iterator i = consoleLog_.begin(); i != consoleLog_.end(); ++i)
 		{
-			std::cout << "Roll some dice!";
-		}
-		else
-		{
-			std::cout << alertMessage;
+			if (count < 3)
+			{
+				std::cout << *i << std::endl;
+				count++;
+			}
+			else
+			{
+				break;
+			}
 		}
 
-		std::cout << "\n\n\nScore: " << turnScore_;
+		std::cout << "\n\n\nTotal Score: " << totalScore_;
 
 		std::cout << "\n\n\nRoll: ";
 
@@ -48,6 +59,8 @@ void Player::turn()
 			}
 		}
 
+		std::cout << "\n\nStored Dice Total: " << turnScore_;
+
 		std::cout << "\n\nStored Dice: ";
 
 		if (storedDice_.size() > 0)
@@ -57,11 +70,51 @@ void Player::turn()
 				std::cout << storedDice_[i] << " ";
 			}
 		}
+		else
+		{
+			std::cout << "- - - - - -";
+		}
 
-		std::cout << "\n\n\nWhat would you like to do?\n";
-		std::cout << "(R)oll  --  (P)ass  --  (S)core  --  (Q)uit\n";
+		// Bool to make sure user presses only R, P, S, and Q.
+		// Main input bool.
+		bool isDone = false;  
+		
+		// Check if the player has farkled
+		if (isFarkled_)
+		{
+			bool hasTypedP = false;
 
-		bool isDone = false;  // Bool to make sure user presses only R, P, S, and Q
+			std::cout << "\n\n\nPress \'P\' to move to the next player.\n";
+			
+			char userChar;
+
+			while (!hasTypedP)
+			{
+				std::cin >> userChar;
+				userChar = toupper(userChar);
+				
+				if (userChar == 'P')
+				{
+					hasTypedP = true;
+					isDone = true;
+					isPlayersTurn = false;
+					isFarkled_ = false;
+					dice_.clear();
+				}
+				else
+				{
+					std::cout << "That's not a \'P\'! Try it again please.\n";
+				}
+
+			}
+
+		}
+		else
+		{
+			std::cout << "\n\n\nWhat would you like to do?\n";
+			std::cout << "(R)oll  --  (P)ass  --  (S)core  --  (Q)uit\n";
+		}
+
 
 		while (!isDone)
 		{
@@ -73,76 +126,107 @@ void Player::turn()
 			{
 			case 'r':
 			case 'R':
-				alertMessage = "----You throw your dice against the table...";
+				// Check if the player has already rolled
+				// TODO this is messed up. Fix it.
+				if (!hasRolledDice_)
+				{
+					consoleLog_.push_front("----You throw your dice against the table...");
 
-				// Are any dice stored yet?
-				if (storedDice_.size() == 0)
-				{
-					// Roll all 6 dice
-					rollDice(6);
-				}
-				else
-				{
-					// Subtract the amount of stored dice, and roll the remainder
-					rollDice(6 - storedDice_.size());
-				}
-
-				for (unsigned int i = 0; i < dice_.size(); i++)
-				{
-					if (dice_[i] == 1 || dice_[i] == 5)
+					// Are any dice stored yet?
+					if (storedDice_.size() == 0)
 					{
-						// Found a 1 or a 5, so break out of for loop
-						isFarkled_ = false;
-						continue;
+						// Roll all 6 dice
+						rollDice(6);
 					}
 					else
 					{
-						isFarkled_ = true;
+						// Subtract the amount of stored dice, and roll the remainder
+						rollDice(6 - storedDice_.size());
 					}
+
+					int triples = scoreRules_.scoreDice(dice_);
+
+					// Check the new dice to see if the player has farkled
+					for (unsigned int i = 0; i < dice_.size(); i++)
+					{
+						if (dice_[i] == 1 || dice_[i] == 5 || triples != -5)
+						{
+							// Found a 1 or a 5 or triples, so break out of for loop
+							isFarkled_ = false;
+							break;
+						}
+						else
+						{
+							isFarkled_ = true;
+						}
+					}
+
+					if (isFarkled_)
+					{
+						consoleLog_.push_front("Dang, you Farkled! You've lost all of your stored points.  :-(");
+						storedDice_.clear(); 
+					}
+					
+					hasRolledDice_ = true; // Flag stops the player from continuously rolling the dice
+				}
+				else
+				{
+					consoleLog_.push_front("----You've already rolled!");
 				}
 
+				canStoreDice_ = true;
 				isDone = true;  // Get out of input loop
 				break;
 
 			case 'P':
 			case 'p':
+
+				// Store the turnScore into the totalScore
+				totalScore_ += turnScore_;
+
 				// Move on to the next player's turn
 				isPlayersTurn = false;
 				isDone = true;
+				
 				break;
 
 			case 's':
 			case 'S':
-			{  // Curly braces needed to declare variables inside SWITCH (local scope)
+			{   // Curly braces needed to declare variables inside SWITCH (local scope)
+				
+				if (!canStoreDice_)
+				{
+					consoleLog_.push_front("----You must roll your dice again, before you can store anything new!");
+					break;
+				}
+
 				// Make sure the player has dice to score, first
 				if (dice_.size() == 0)  
 				{
-					alertMessage = "Press \'R\' to roll your dice first!";
+					consoleLog_.push_front("Press \'R\' to roll your dice first!");
 				}
 				else
 				{
-					std::string line;
+					std::vector<int> userStoringInput;
+					std::string inputLine;
 					int number;
 
 					std::cout << "\nWhich dice would you like to set aside for scoring?\n";
 					std::cout << "Ex. input: 1 1 1 5. Separate your numbers with a space.\n";
 
 					std::cin.ignore(); // Ignore the newline char leftover from last cin operation
-					std::getline(std::cin, line);  // Read the entire line of input from user
-					std::istringstream stream(line);  // Create our own stream
+					std::getline(std::cin, inputLine);  // Read the entire line of input from user
+					std::istringstream stream(inputLine);  // Create our own stream
 					while (stream >> number)
 					{
-						storedDice_.push_back(number);
+						userStoringInput.push_back(number);
 					}
 
 					// TODO Sanitize user's input on what dice they're trying to store
-					// Have a third vector, so we can separate the stored values
-					// and the values we want to check against the scoring rules.
-					// As it is right now, when the user re-rolls with a triple in the storedDice_,
-					// it's being counted in the score as a triple. Not cool.
+
 
 					// Check to see if there are any triples in the dice to be stored
-					int triples = scoreRules_.scoreDice(storedDice_);
+					int triples = scoreRules_.scoreDice(userStoringInput);
 
 					switch (triples)
 					{
@@ -167,27 +251,34 @@ void Player::turn()
 
 						break;
 					case -5:  // Found no triples
-						for (unsigned int i = 0; i < storedDice_.size(); i++)
+						for (unsigned int i = 0; i < userStoringInput.size(); i++)
 						{
-							if (storedDice_[i] == 1)
+							if (userStoringInput[i] == 1)
 							{
 								turnScore_ += 100;
 								removeDice(1, 1);
 							}
-							else if (storedDice_[i] == 5)
+							else if (userStoringInput[i] == 5)
 							{
 								turnScore_ += 50;
 								removeDice(5, 1);
 							}
 						}
-						break;
 					}
-				}
 
-				// See what else the player wants to do:
-				// Roll remaining dice, or stop and keep points acquired.
-				isDone = true;
-				break;
+					// Add values to the storedDice vector
+					for (unsigned int i = 0; i < userStoringInput.size(); i++)
+					{
+						storedDice_.push_back(userStoringInput[i]);
+					}
+
+					consoleLog_.push_front("----You stored some dice.");
+
+					hasRolledDice_ = false; // Resets flag to false, so player can roll again
+					canStoreDice_ = false;
+					isDone = true;
+					break;
+				}
 			}
 
 			case 'q':
@@ -229,5 +320,10 @@ void Player::rollDice(int numDice)
 	{
 		dice_.push_back(distr(eng));
 	}
+}
+
+void Player::pass()
+{
+	
 }
 

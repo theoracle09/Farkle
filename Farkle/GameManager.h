@@ -29,6 +29,6 @@ private:
 	int rollSingleDie();
 	
 	// DEV
-	int flag_ = 0;
+	int dev_usersNames_ = 0;
 };
 

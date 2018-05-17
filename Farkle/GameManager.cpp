@@ -205,21 +205,21 @@ void GameManager::recordPlayerName()
 	std::string playerName;
 
 	// DEV
-	switch (flag_)
+	switch (dev_usersNames_)
 	{
 	case 0:
 		playerName = "Josh";
-		flag_++;
+		dev_usersNames_++;
 		break;
 
 	case 1:
 		playerName = "Jaci";
-		flag_++;
+		dev_usersNames_++;
 		break;
 
 	case 2:
 		playerName = "Bill";
-		flag_++;
+		dev_usersNames_++;
 		break;
 
 	case 3:
