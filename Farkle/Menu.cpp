@@ -23,6 +23,7 @@ void Menu::printMainMenu()
 
 void Menu::printRules()
 {
+	// TODO grab rules from a text file. EZPZ.
 	std::cout << "Rules.\n";
 }
 

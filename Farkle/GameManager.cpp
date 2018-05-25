@@ -25,13 +25,11 @@ void GameManager::displayMenu()
 	bool isDone = false;
 	char userInput;
 
-	clearScreen();
-	menu_.printMainMenu();
-	std::cout << "\nPlease type the first letter of the option you'd like above\n";
-	
 	while (!isDone)
 	{
-
+		clearScreen();
+		menu_.printMainMenu();
+		std::cout << "\nPlease type the first letter of the option you'd like above\n";
 		std::cin >> userInput;
 
 		switch (userInput)
@@ -49,6 +47,7 @@ void GameManager::displayMenu()
 			case 'r':
 			case 'R':
 				displayRules();
+				//isDone = true;
 				break;
 
 			case 'e':

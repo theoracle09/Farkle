@@ -4,6 +4,7 @@ List of tasks/features/ramblings
 *********************************/
 
 TODO
+	Grab rules from txt file and display in menu
 	Bug when user stores dice, and tries to store them again before re-rolling
 	Sanitize user's input on what dice they're trying to store
 	Handle what happens when the player wants to quit to main menu

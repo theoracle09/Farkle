@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Player.h"
+#include <ctime>
 #include <random>
 #include <sstream>
 
@@ -51,7 +52,7 @@ void Player::turn()
 
 		std::cout << "\n\n\nRoll: ";
 
-		if (dice_.size() > 0)
+		if (dice_.size() > 0) // Display dice vector, if there's anything in there
 		{
 			for (unsigned int i = 0; i < dice_.size(); i++)
 			{
@@ -112,7 +113,17 @@ void Player::turn()
 		else
 		{
 			std::cout << "\n\n\nWhat would you like to do?\n";
-			std::cout << "(R)oll  --  (P)ass  --  (S)core  --  (Q)uit\n";
+
+			if (hasRolledDice_)
+			{
+				std::cout << "(P)ass  --  (S)core  --  (Q)uit\n";
+			}
+			else
+			{
+				std::cout << "(R)oll  --  (P)ass  --  (S)core  --  (Q)uit\n";
+
+			}
+
 		}
 
 
@@ -272,10 +283,12 @@ void Player::turn()
 						storedDice_.push_back(userStoringInput[i]);
 					}
 
-					consoleLog_.push_front("----You stored some dice.");
+					//consoleLog_.push_front("----You stored some dice.");
+					consoleLog_.push_front(logEntry("Testing message"));
+
 
 					hasRolledDice_ = false; // Resets flag to false, so player can roll again
-					canStoreDice_ = false;
+					canStoreDice_ = false; // Already stored the dice, so set to false
 					isDone = true;
 					break;
 				}
@@ -322,8 +335,14 @@ void Player::rollDice(int numDice)
 	}
 }
 
-void Player::pass()
+/************************
+Affixes the date and time to the front of a custom message
+*************************/
+std::string Player::logEntry(std::string message)
 {
-	
+	std::time_t t = std::time(0); // Gets current time
+	char* dt = ctime(&t);
+
+	std::cout << dt;
 }
 
