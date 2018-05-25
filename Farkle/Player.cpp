@@ -15,20 +15,23 @@ Player::Player(std::string name, int diceSides)
 	singleDieRoll_ = 0;
 	isFirstPlayer_ = false;
 	isFarkled_ = false;
-	hasRolledDice_ = false;
+	canRollDice_ = true;
 	hasEnteredGame_ = true;
-	canStoreDice_ = true;
+	canStoreDice_ = false;
 }
 
 void Player::turn()
 {
+	// Reset some flags
 	bool isPlayersTurn = true;
 	bool isFarkled_ = false;
-	hasRolledDice_ = false;
+	canRollDice_ = true;
+
 
 	turnScore_ = 0; // Tracks the player's score throughout the turn
 
 	dice_.clear(); // On subsequent turns, this needs to be cleared for the player to roll again
+	storedDice_.clear();
 
 	while (isPlayersTurn)
 	{
@@ -40,7 +43,7 @@ void Player::turn()
 		// Displays the first 3 lines of our 'fake console' log
 		int count = 0;
 
-		for (std::list<std::string>::const_iterator i = consoleLog_.begin(); i != consoleLog_.end(); ++i)
+		for (std::list<std::string>::const_iterator i = gameOutput_.begin(); i != gameOutput_.end(); ++i)
 		{
 			if (count < 3)
 			{
@@ -119,15 +122,17 @@ void Player::turn()
 		{
 			std::cout << "\n\n\nWhat would you like to do?\n";
 
-			if (hasRolledDice_)
+			if (canRollDice_)
 			{
-				std::cout << "(P)ass  --  (S)core  --  (Q)uit\n";
+				std::cout << "(R)oll  --  ";
 			}
-			else
-			{
-				std::cout << "(R)oll  --  (P)ass  --  (S)core  --  (Q)uit\n";
 
+			if (canStoreDice_)
+			{
+				std::cout << "(S)core  --  ";
 			}
+
+			std::cout << "(P)ass  -- (Q)uit\n";
 
 		}
 
@@ -143,14 +148,8 @@ void Player::turn()
 			case 'r':
 			case 'R':
 				// Check if the player has already rolled
-				if (hasRolledDice_)
+				if (canRollDice_)
 				{
-					logEntry("You've already rolled!");
-				}
-				else
-				{
-					logEntry("You throw your dice against the table...");
-
 					// Are any dice stored yet?
 					if (storedDice_.size() == 0)
 					{
@@ -186,7 +185,11 @@ void Player::turn()
 						storedDice_.clear();
 					}
 
-					hasRolledDice_ = true; // Flag stops the player from continuously rolling the dice
+					canRollDice_ = false; // Flag stops the player from continuously rolling the dice
+				}
+				else
+				{
+					logEntry("You've already rolled!");
 				}
 
 				canStoreDice_ = true;
@@ -207,94 +210,9 @@ void Player::turn()
 
 			case 's':
 			case 'S':
-			{   // Curly braces needed to declare variables inside SWITCH (local scope)
-				
-				if (!canStoreDice_)
-				{
-					logEntry("You must roll your dice again, before you can store anything new!");
-					break;
-				}
-
-				// Make sure the player has dice to score, first
-				if (dice_.size() == 0)  
-				{
-					logEntry("Press \'R\' to roll your dice first!");
-				}
-				else
-				{
-					std::vector<int> userStoringInput;
-					std::string inputLine;
-					int number;
-
-					std::cout << "\nWhich dice would you like to set aside for scoring?\n";
-					std::cout << "Ex. input: 1 1 1 5. Separate your numbers with a space.\n";
-
-					std::cin.ignore(); // Ignore the newline char leftover from last cin operation
-					std::getline(std::cin, inputLine);  // Read the entire line of input from user
-					std::istringstream stream(inputLine);  // Create our own stream
-					while (stream >> number)
-					{
-						userStoringInput.push_back(number);
-					}
-
-					// TODO Sanitize user's input on what dice they're trying to store
-
-
-					// Check to see if there are any triples in the dice to be stored
-					int triples = scoreRules_.scoreDice(userStoringInput);
-
-					switch (triples)
-					{
-					case 1:
-					case 2:
-					case 3:
-					case 4:
-					case 5:
-					case 6:
-						// We have a triple, which number do we need to delete from the rolled dice?
-						removeDice(triples, 3);
-
-						// Now add the triple score to the user's score
-						if (triples == 1)
-						{
-							turnScore_ += 1000;
-						}
-						else
-						{
-							turnScore_ += (triples * 100);
-						}
-
-						break;
-					case -5:  // Found no triples
-						for (unsigned int i = 0; i < userStoringInput.size(); i++)
-						{
-							if (userStoringInput[i] == 1)
-							{
-								turnScore_ += 100;
-								removeDice(1, 1);
-							}
-							else if (userStoringInput[i] == 5)
-							{
-								turnScore_ += 50;
-								removeDice(5, 1);
-							}
-						}
-					}
-
-					// Add values to the storedDice vector
-					for (unsigned int i = 0; i < userStoringInput.size(); i++)
-					{
-						storedDice_.push_back(userStoringInput[i]);
-					}
-
-					logEntry("You stored some dice.");
-
-					hasRolledDice_ = false; // Resets flag to false, so player can roll again
-					canStoreDice_ = false; // Already stored the dice, so set to false
-					isDone = true;
-					break;
-				}
-			}
+				storeDice();
+				isDone = true;
+				break;
 
 			case 'q':
 			case 'Q':
@@ -317,15 +235,16 @@ void Player::removeDice(int die, int numTimes)
 	// before the next operation. Ex: dice_ = 5 5 6 1 4 5. dice_[0] will be a 5, so when i is 5 in the loop
 	// it'll get removed and everything gets shifted to the left. The 5 that was at index [1] is now at index [0]
 	// but i is now 1. The second loop checks the vector again to make sure it got all the numbers.
-	for (int j = 0; j < 2; j++)
+
+	for (unsigned int i = 0; i < dice_.size(); i++)
 	{
-		for (unsigned int i = 0; i < dice_.size(); i++)
+		if (dice_[i] == die && count < numTimes)
 		{
-			if (dice_[i] == die && count <= numTimes)
-			{
-				dice_.erase(dice_.begin() + i);
-				count++;
-			}
+			dice_.erase(dice_.begin() + i);
+			count++;
+			
+			// Subtract 1 from i, so the loop can check the same index again.
+			--i;
 		}
 	}
 }
@@ -342,10 +261,21 @@ void Player::rollDice(int numDice)
 	{
 		dice_.push_back(distr(eng));
 	}
+
+	std::stringstream ss;
+	std::string output;
+	ss << "You rolled: ";
+
+	for (unsigned int i = 0; i < dice_.size(); i++)
+	{
+		ss << dice_[i] << " ";
+	}
+
+	logEntry(ss.str());
 }
 
 /************************
-Affixes the date and time to the front of a custom message
+Affixes the time to the front of a custom message
 *************************/
 void Player::logEntry(std::string message)
 {
@@ -357,6 +287,167 @@ void Player::logEntry(std::string message)
 	ss << std::put_time(std::localtime(&now_c), "%T") << ": " << message;
 
 	// Add string to consoleLog
-	consoleLog_.push_front(ss.str());
+	gameOutput_.push_front(ss.str());
+}
+
+void Player::storeDice()
+{
+	if (!canStoreDice_)
+	{
+		logEntry("You must roll your dice again, before you can store anything new!");
+		return;
+	}
+
+	// Make sure the player has dice to score, first
+	if (dice_.size() == 0)
+	{
+		logEntry("Press \'R\' to roll your dice first!");
+	}
+	else
+	{
+		std::vector<int> userStoringInput;
+		std::vector<int> userInputCopy;
+		std::vector<int> diceCopy;
+		std::string inputLine;
+		int number, amountOfNumbersToStore;
+
+		std::cout << "\nWhich dice would you like to set aside for scoring?\n";
+		std::cout << "Ex. input: 1 1 1 5. Separate your numbers with a space.\n";
+
+		std::cin.ignore(); // Ignore the newline char leftover from last cin operation
+		std::getline(std::cin, inputLine);  // Read the entire line of input from user
+		std::istringstream stream(inputLine);  // Create our own stream
+		while (stream >> number)
+		{
+			userStoringInput.push_back(number);
+		}
+
+		// How many numbers is the player trying to store?
+		amountOfNumbersToStore = userStoringInput.size();
+
+		// Copy user input into a temp vector
+		for (unsigned int i = 0; i < userStoringInput.size(); i++)
+		{
+			userInputCopy.push_back(userStoringInput[i]);
+		}
+
+		// Copy dice into temp vector
+		for (unsigned int i = 0; i < dice_.size(); i++)
+		{
+			diceCopy.push_back(dice_[i]);
+		}
+
+		// Check both temp vectors against eachother for matching numbers
+		while (amountOfNumbersToStore > 0)
+		{
+			for (unsigned int j = 0; j < diceCopy.size(); j++)
+			{
+				for (unsigned int i = 0; i < userInputCopy.size(); i++)
+				{
+					if (userInputCopy[i] == diceCopy[j])
+					{
+						// Only delete the amount of numbers the user specified. If the user only entered 
+						// 2 numbers to store, only delete those 2 numbers and not others as well.
+						if (amountOfNumbersToStore > 0)
+						{
+							// Delete the number from both temp vectors
+							userInputCopy.erase(userInputCopy.begin() + i);
+							diceCopy.erase(diceCopy.begin() + j);
+							amountOfNumbersToStore--;
+						}
+					}
+				}
+			}
+
+		}
+
+		// Check if the user input temp vector is empty
+		if (userInputCopy.size() == 0)
+		{
+			// User typed the correct numbers
+			// Check to see if there are any triples in the dice to be stored
+			// Function returns -5 if it doesn't find a triple. Returns 1-6 otherwise
+			// if it does find a triple. 
+			int triples = scoreRules_.scoreDice(userStoringInput);
+
+			switch (triples)
+			{
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+				// We have a triple, which number do we need to delete from the rolled dice?
+				removeDice(triples, 3);
+
+				// Now add the triple score to the user's score
+				if (triples == 1)
+				{
+					turnScore_ += 1000;
+				}
+				else
+				{
+					turnScore_ += (triples * 100);
+				}
+
+				break;
+			case -5:  // Found no triples
+
+					  // Loop through storedInput and add the 1 or 5 to the user's score
+				for (unsigned int i = 0; i < userStoringInput.size(); i++)
+				{
+					if (userStoringInput[i] == 1)
+					{
+						turnScore_ += 100;
+						removeDice(1, 1);
+					}
+					else if (userStoringInput[i] == 5)
+					{
+						turnScore_ += 50;
+						removeDice(5, 1);
+					}
+				}
+			}
+
+			// Add values to the storedDice vector
+			for (unsigned int i = 0; i < userStoringInput.size(); i++)
+			{
+				storedDice_.push_back(userStoringInput[i]);
+			}
+
+			std::stringstream ss;
+			std::string output;
+			ss << "You stored: ";
+
+			for (unsigned int i = 0; i < userStoringInput.size(); i++)
+			{
+				ss << userStoringInput[i] << " ";
+			}
+
+			logEntry(ss.str());
+			
+			// Already stored the dice, so set flag to false...however...
+			// still have to run a check to see if any dice remain that can be stored.
+			canStoreDice_ = false; 
+
+			// Are any numbers left in the dice_ vector which can be stored?
+			for (unsigned int i = 0; i < dice_.size(); i++)
+			{
+				if (dice_[i] == 1 || dice_[i] == 5)
+				{
+					canStoreDice_ = true;
+				}
+			}
+
+			canRollDice_ = true; // Resets flag to true, so player can roll again
+
+		}
+		else
+		{
+			// User has incorrect input
+			logEntry("Sorry, I don't recognize some of your numbers. Please try again.");
+		}	
+	}
 }
 

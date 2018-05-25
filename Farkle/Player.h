@@ -29,15 +29,16 @@ private:
 	bool isFirstPlayer_;
 	bool hasEnteredGame_;
 	bool isFarkled_;
-	bool hasRolledDice_;
+	bool canRollDice_;
 	bool canStoreDice_;
 	std::string name_;
 	std::vector<int> dice_;
 	std::vector<int> storedDice_;
-	std::list<std::string> consoleLog_;
+	std::list<std::string> gameOutput_;
 	
 	void clearScreen() const { std::cout << std::string(100, '\n'); };
 	void rollDice(int numDice);
 	void logEntry(std::string message);
+	void storeDice();
 };
 

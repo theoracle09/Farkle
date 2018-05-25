@@ -194,11 +194,6 @@ void GameManager::play()
 
 }
 
-void GameManager::pause()
-{
-	system("PAUSE");
-}
-
 void GameManager::recordPlayerName()
 {
 	std::string playerName;
