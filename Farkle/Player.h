@@ -38,6 +38,6 @@ private:
 	
 	void clearScreen() const { std::cout << std::string(100, '\n'); };
 	void rollDice(int numDice);
-	std::string logEntry(std::string message);
+	void logEntry(std::string message);
 };
 

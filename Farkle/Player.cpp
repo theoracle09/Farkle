@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Player.h"
-#include <ctime>
+#include <chrono>
+#include <iomanip> // std::put_time
 #include <random>
 #include <sstream>
 
@@ -22,8 +23,12 @@ Player::Player(std::string name, int diceSides)
 void Player::turn()
 {
 	bool isPlayersTurn = true;
+	bool isFarkled_ = false;
+	hasRolledDice_ = false;
 
 	turnScore_ = 0; // Tracks the player's score throughout the turn
+
+	dice_.clear(); // On subsequent turns, this needs to be cleared for the player to roll again
 
 	while (isPlayersTurn)
 	{
@@ -138,10 +143,13 @@ void Player::turn()
 			case 'r':
 			case 'R':
 				// Check if the player has already rolled
-				// TODO this is messed up. Fix it.
-				if (!hasRolledDice_)
+				if (hasRolledDice_)
 				{
-					consoleLog_.push_front("----You throw your dice against the table...");
+					logEntry("You've already rolled!");
+				}
+				else
+				{
+					logEntry("You throw your dice against the table...");
 
 					// Are any dice stored yet?
 					if (storedDice_.size() == 0)
@@ -174,15 +182,11 @@ void Player::turn()
 
 					if (isFarkled_)
 					{
-						consoleLog_.push_front("Dang, you Farkled! You've lost all of your stored points.  :-(");
-						storedDice_.clear(); 
+						logEntry("Dang, you Farkled! You've lost all of your stored points.  :-(");
+						storedDice_.clear();
 					}
-					
+
 					hasRolledDice_ = true; // Flag stops the player from continuously rolling the dice
-				}
-				else
-				{
-					consoleLog_.push_front("----You've already rolled!");
 				}
 
 				canStoreDice_ = true;
@@ -207,14 +211,14 @@ void Player::turn()
 				
 				if (!canStoreDice_)
 				{
-					consoleLog_.push_front("----You must roll your dice again, before you can store anything new!");
+					logEntry("You must roll your dice again, before you can store anything new!");
 					break;
 				}
 
 				// Make sure the player has dice to score, first
 				if (dice_.size() == 0)  
 				{
-					consoleLog_.push_front("Press \'R\' to roll your dice first!");
+					logEntry("Press \'R\' to roll your dice first!");
 				}
 				else
 				{
@@ -283,9 +287,7 @@ void Player::turn()
 						storedDice_.push_back(userStoringInput[i]);
 					}
 
-					//consoleLog_.push_front("----You stored some dice.");
-					consoleLog_.push_front(logEntry("Testing message"));
-
+					logEntry("You stored some dice.");
 
 					hasRolledDice_ = false; // Resets flag to false, so player can roll again
 					canStoreDice_ = false; // Already stored the dice, so set to false
@@ -311,12 +313,19 @@ void Player::removeDice(int die, int numTimes)
 {
 	int count = 0;
 
-	for (unsigned int i = 0; i < dice_.size(); i++)
+	// Loops through the dice_ vector twice, because if we delete index 0, everything gets shifted to the left
+	// before the next operation. Ex: dice_ = 5 5 6 1 4 5. dice_[0] will be a 5, so when i is 5 in the loop
+	// it'll get removed and everything gets shifted to the left. The 5 that was at index [1] is now at index [0]
+	// but i is now 1. The second loop checks the vector again to make sure it got all the numbers.
+	for (int j = 0; j < 2; j++)
 	{
-		if (dice_[i] == die && count < numTimes)
+		for (unsigned int i = 0; i < dice_.size(); i++)
 		{
-			dice_.erase(dice_.begin() + i);
-			count++;
+			if (dice_[i] == die && count <= numTimes)
+			{
+				dice_.erase(dice_.begin() + i);
+				count++;
+			}
 		}
 	}
 }
@@ -338,11 +347,16 @@ void Player::rollDice(int numDice)
 /************************
 Affixes the date and time to the front of a custom message
 *************************/
-std::string Player::logEntry(std::string message)
+void Player::logEntry(std::string message)
 {
-	std::time_t t = std::time(0); // Gets current time
-	char* dt = ctime(&t);
+	auto now = std::chrono::system_clock::now();
+	auto now_c = std::chrono::system_clock::to_time_t(now);
 
-	std::cout << dt;
+	std::stringstream ss;
+	// std::localtime throws a thread safe warning. I turned the warning off in Visual Studio.
+	ss << std::put_time(std::localtime(&now_c), "%T") << ": " << message;
+
+	// Add string to consoleLog
+	consoleLog_.push_front(ss.str());
 }
 
