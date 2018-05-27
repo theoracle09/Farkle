@@ -19,6 +19,7 @@ public:
 	void setIsFirstPlayer() { isFirstPlayer_ = true; };
 	bool getIsFirstPlayer() const { return isFirstPlayer_; };
 	void addToScore(int amount) { turnScore_ += amount; };
+	bool getIsWinner();
 
 private:
 	ScoreRules scoreRules_;

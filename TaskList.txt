@@ -5,8 +5,6 @@ List of tasks/features/ramblings
 
 TODO
 	Grab rules from txt file and display in menu
-	Bug when user stores dice, and tries to store them again before re-rolling
-	Sanitize user's input on what dice they're trying to store
 	Handle what happens when the player wants to quit to main menu
 	Describe all methods with their own header
 	Alphabetize the includes consistently
@@ -16,7 +14,6 @@ TODO
 
 
 Features
-	consoleEmulator_ to show the last 3 moves of the player
 	Vector of strings to eventually store in a txt for replay
 	Single player with AI
 	

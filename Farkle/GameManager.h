@@ -22,10 +22,11 @@ private:
 	int diceSides_; // Stores how many sides the dice have. Possible feature in the future.
 	std::vector<Player> players_;
 	
-	void clearScreen() const { std::cout << std::string(100, '\n'); };
 	void recordPlayerName();
 	void findWhoGoesFirst();
 	int rollSingleDie();
+	void endGame(Player winner);
+	void clearScreen() const { std::cout << std::string(100, '\n'); };
 	
 	// DEV
 	int dev_usersNames_ = 0;

@@ -47,7 +47,6 @@ void GameManager::displayMenu()
 			case 'r':
 			case 'R':
 				displayRules();
-				//isDone = true;
 				break;
 
 			case 'e':
@@ -188,10 +187,23 @@ void GameManager::play()
 		for (unsigned int i = 0; i < players_.size(); i++)
 		{
 			players_[i].turn();
+
+			if (players_[i].getIsWinner())
+			{
+				endGame(players_[i]);
+				isDone = true;
+				break;
+			}
+			
 		}
 
 	} while (!isDone);
 
+}
+
+bool GameManager::cmd(const Player& p1, const Player& p2)
+{
+	return p1.getSingleDieRoll() > p2.getSingleDieRoll();
 }
 
 void GameManager::recordPlayerName()
@@ -321,7 +333,16 @@ int GameManager::rollSingleDie()
 	return roll;
 }
 
-bool GameManager::cmd(const Player& p1, const Player& p2)
+void GameManager::endGame(Player winner)
 {
-	return p1.getSingleDieRoll() > p2.getSingleDieRoll();
+	clearScreen();
+
+	std::cout << "\nCongratulations " << winner.getPlayerName() << "!\n\n";
+
+	std::cout << "\nPress any key to return to main menu.\n";
+
+	std::string s;  // Temp string to pause for user input
+	std::cin.ignore();
+	std::getline(std::cin, s);
 }
+

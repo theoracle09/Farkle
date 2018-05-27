@@ -231,11 +231,6 @@ void Player::removeDice(int die, int numTimes)
 {
 	int count = 0;
 
-	// Loops through the dice_ vector twice, because if we delete index 0, everything gets shifted to the left
-	// before the next operation. Ex: dice_ = 5 5 6 1 4 5. dice_[0] will be a 5, so when i is 5 in the loop
-	// it'll get removed and everything gets shifted to the left. The 5 that was at index [1] is now at index [0]
-	// but i is now 1. The second loop checks the vector again to make sure it got all the numbers.
-
 	for (unsigned int i = 0; i < dice_.size(); i++)
 	{
 		if (dice_[i] == die && count < numTimes)
@@ -246,6 +241,18 @@ void Player::removeDice(int die, int numTimes)
 			// Subtract 1 from i, so the loop can check the same index again.
 			--i;
 		}
+	}
+}
+
+bool Player::getIsWinner()
+{
+	if (totalScore_ >= 10000)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }
 
@@ -308,6 +315,7 @@ void Player::storeDice()
 		std::vector<int> userStoringInput;
 		std::vector<int> userInputCopy;
 		std::vector<int> diceCopy;
+		std::vector<int> storedCurrentTurn; // Numbers player wants to store during current turn
 		std::string inputLine;
 		int number, amountOfNumbersToStore;
 
@@ -353,13 +361,13 @@ void Player::storeDice()
 							// Delete the number from both temp vectors
 							userInputCopy.erase(userInputCopy.begin() + i);
 							diceCopy.erase(diceCopy.begin() + j);
-							amountOfNumbersToStore--;
+							--amountOfNumbersToStore;
 						}
 					}
 				}
 			}
-
 		}
+
 
 		// Check if the user input temp vector is empty
 		if (userInputCopy.size() == 0)
@@ -391,6 +399,12 @@ void Player::storeDice()
 					turnScore_ += (triples * 100);
 				}
 
+				for (int i = 0; i < 3; i++)
+				{
+					storedDice_.push_back(triples);
+					storedCurrentTurn.push_back(triples);
+				}
+
 				break;
 			case -5:  // Found no triples
 
@@ -401,28 +415,26 @@ void Player::storeDice()
 					{
 						turnScore_ += 100;
 						removeDice(1, 1);
+						storedDice_.push_back(1);
+						storedCurrentTurn.push_back(1);
 					}
 					else if (userStoringInput[i] == 5)
 					{
 						turnScore_ += 50;
 						removeDice(5, 1);
+						storedDice_.push_back(5);
+						storedCurrentTurn.push_back(5);
 					}
 				}
-			}
-
-			// Add values to the storedDice vector
-			for (unsigned int i = 0; i < userStoringInput.size(); i++)
-			{
-				storedDice_.push_back(userStoringInput[i]);
 			}
 
 			std::stringstream ss;
 			std::string output;
 			ss << "You stored: ";
 
-			for (unsigned int i = 0; i < userStoringInput.size(); i++)
+			for (unsigned int i = 0; i < storedCurrentTurn.size(); i++)
 			{
-				ss << userStoringInput[i] << " ";
+				ss << storedCurrentTurn[i] << " ";
 			}
 
 			logEntry(ss.str());
