@@ -5,6 +5,10 @@
 #include <random>
 #include <sstream>
 
+Player::Player()
+{
+
+}
 
 Player::Player(std::string name, int diceSides)
 {
@@ -162,7 +166,7 @@ void Player::turn()
 						rollDice(6 - storedDice_.size());
 					}
 
-					int triples = scoreRules_.scoreDice(dice_);
+					int triples = scoreRules_.findTriples(dice_);
 
 					// Check the new dice to see if the player has farkled
 					for (unsigned int i = 0; i < dice_.size(); i++)
@@ -246,7 +250,7 @@ void Player::removeDice(int die, int numTimes)
 
 bool Player::getIsWinner()
 {
-	if (totalScore_ >= 10000)
+	if (totalScore_ >= 1500)
 	{
 		return true;
 	}
@@ -346,27 +350,32 @@ void Player::storeDice()
 		}
 
 		// Check both temp vectors against eachother for matching numbers
-		while (amountOfNumbersToStore > 0)
+
+		for (unsigned int j = 0; j < diceCopy.size(); j++)
 		{
-			for (unsigned int j = 0; j < diceCopy.size(); j++)
+			for (unsigned int i = 0; i < userInputCopy.size(); i++)
 			{
-				for (unsigned int i = 0; i < userInputCopy.size(); i++)
+				if (userInputCopy[i] == diceCopy[j])
 				{
-					if (userInputCopy[i] == diceCopy[j])
+					// Only delete the amount of numbers the user specified. If the user only entered 
+					// 2 numbers to store, only delete those 2 numbers and not others as well.
+					if (amountOfNumbersToStore > 0)
 					{
-						// Only delete the amount of numbers the user specified. If the user only entered 
-						// 2 numbers to store, only delete those 2 numbers and not others as well.
-						if (amountOfNumbersToStore > 0)
-						{
-							// Delete the number from both temp vectors
-							userInputCopy.erase(userInputCopy.begin() + i);
-							diceCopy.erase(diceCopy.begin() + j);
-							--amountOfNumbersToStore;
-						}
+						// Delete the number from both temp vectors
+						userInputCopy.erase(userInputCopy.begin() + i);
+						diceCopy.erase(diceCopy.begin() + j);
+						--amountOfNumbersToStore;
+
+						// Have to subtract one from the userInputCopy index. Ex: If [3] gets erased 
+						// from a vector, element [4] gets moved to position [3]. This skips the next
+						// iteration check. To stop this from happening, we check the index position
+						// again, to make sure that new element can be stored.
+						i--;
 					}
 				}
 			}
 		}
+
 
 
 		// Check if the user input temp vector is empty
@@ -376,7 +385,7 @@ void Player::storeDice()
 			// Check to see if there are any triples in the dice to be stored
 			// Function returns -5 if it doesn't find a triple. Returns 1-6 otherwise
 			// if it does find a triple. 
-			int triples = scoreRules_.scoreDice(userStoringInput);
+			int triples = scoreRules_.findTriples(userStoringInput);
 
 			switch (triples)
 			{

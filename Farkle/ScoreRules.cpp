@@ -10,7 +10,12 @@ ScoreRules::ScoreRules()
 	
 }
 
-int ScoreRules::scoreDice(std::vector<int>& storedDice)
+/************************
+Takes a vector of ints (the player's stored dice) and checks if there are three of a kind
+present. I do this by creating a temp vector, whose sole job is to track the number of dice 
+the player stores. 
+*************************/
+int ScoreRules::findTriples(std::vector<int>& storedDice)
 {
 	// Check for triplets
 	std::vector<int> numberOfSides(6); // Need to define the size here, or we'll get vector subscript errors

@@ -8,6 +8,7 @@
 class Player
 {
 public:
+	Player();
 	Player(std::string name, int diceSides);
 	void turn();
 	void removeDice(int die, int count);
@@ -18,6 +19,7 @@ public:
 	void setSingleDieRoll(int singleDieRoll) { singleDieRoll_ = singleDieRoll; };
 	void setIsFirstPlayer() { isFirstPlayer_ = true; };
 	bool getIsFirstPlayer() const { return isFirstPlayer_; };
+	int getTotalScore() const { return totalScore_; };
 	void addToScore(int amount) { turnScore_ += amount; };
 	bool getIsWinner();
 

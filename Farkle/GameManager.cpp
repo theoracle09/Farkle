@@ -190,7 +190,8 @@ void GameManager::play()
 
 			if (players_[i].getIsWinner())
 			{
-				endGame(players_[i]);
+				winner_ = players_[i];
+				lastRound();
 				isDone = true;
 				break;
 			}
@@ -199,11 +200,6 @@ void GameManager::play()
 
 	} while (!isDone);
 
-}
-
-bool GameManager::cmd(const Player& p1, const Player& p2)
-{
-	return p1.getSingleDieRoll() > p2.getSingleDieRoll();
 }
 
 void GameManager::recordPlayerName()
@@ -344,5 +340,37 @@ void GameManager::endGame(Player winner)
 	std::string s;  // Temp string to pause for user input
 	std::cin.ignore();
 	std::getline(std::cin, s);
+}
+
+void GameManager::lastRound()
+{
+	// Someone has gotten over 10,000
+	std::cout << "Congrats " << winner_.getPlayerName() << ", you scored over 10,000!\n" << 
+		"Each player will get one more turn to try and beat your score.\n" <<
+		"Good luck everyone!\n";
+
+	// Loop through the player's vector one more time
+	for (unsigned int i = 0; i < players_.size(); i++)
+	{
+		players_[i].turn();
+
+		// Check to see if there's a new winner
+		if (players_[i].getTotalScore() > winner_.getTotalScore())
+		{
+			// We have a new winner
+			std::cout << "Nice one " << players_[i].getPlayerName() << ". You beat " << winner_.getPlayerName() << "\n" <<
+				"Let's keep going.\n";
+
+			std::cout << "\nPress any key to go to the next player's turn.\n";
+			std::string s;
+			std::cin.ignore();
+			std::getline(std::cin, s);
+
+			winner_ = players_[i];
+		}
+	}
+
+	// Last round is over, declare the winner
+	endGame(winner_);
 }
 

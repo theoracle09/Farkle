@@ -5,7 +5,7 @@ class ScoreRules
 {
 public:
 	ScoreRules();
-	int scoreDice(std::vector<int>& storedDice);
+	int findTriples(std::vector<int>& storedDice);
 
 
 private:

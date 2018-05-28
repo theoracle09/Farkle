@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Menu.h"
-#include <iostream>
+#include <fstream>  // File IO
+#include <iostream> // Console IO
+#include <string>
 
 
 Menu::Menu()
@@ -23,8 +25,23 @@ void Menu::printMainMenu()
 
 void Menu::printRules()
 {
-	// TODO grab rules from a text file. EZPZ.
-	std::cout << "Rules.\n";
+	std::string fileName = "FarkleRules.txt";
+
+	std::ifstream inputFile;
+	std::string fileRow;
+
+	inputFile.open(fileName);
+
+	if (!inputFile)
+	{
+		std::cout << "Unable to open " << fileName << "...\n";
+		exit(1);
+	}
+
+	while (getline(inputFile, fileRow))
+	{
+		std::cout << fileRow << std::endl;
+	}
 }
 
 
